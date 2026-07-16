@@ -14,5 +14,12 @@
   status = 200
   force = true
 
+# DeepSeek API 代理转发到 Netlify Function
+[[redirects]]
+  from = "/api/deepseek/*"
+  to = "/.netlify/functions/deepseek-proxy"
+  status = 200
+  force = true
+
 [functions]
   directory = "netlify/functions"

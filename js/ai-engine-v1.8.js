@@ -89,8 +89,28 @@ function isMedicalQuestion(text) {
 }
 
 
+// ========== 代理模式检测（与 ocr-engine.js 一致） ==========
+var _aiIsProxyMode = (function() {
+  try {
+    var host = window.location.hostname || '';
+    if (host === 'localhost' || host === '127.0.0.1' ||
+        host.startsWith('192.168.') || host.startsWith('10.') ||
+        host.endsWith('.vercel.app') || host.endsWith('.netlify.app')) {
+      console.log('[AiEngine] 代理模式 → API Key 由服务端注入 (host:' + host + ')');
+      return true;
+    }
+  } catch(e) {}
+  console.log('[AiEngine] 直连模式 → 使用本地 API Key');
+  return false;
+})();
+
+
 // ========== DeepSeek API 配置与管理 ==========
-function getApiKey() { return localStorage.getItem('deepseek_api_key') || ''; }
+function getApiKey() {
+  // 代理模式下返回占位符，跳过本地 Key 检查
+  if (_aiIsProxyMode) return '__PROXY_MODE__';
+  return localStorage.getItem('deepseek_api_key') || '';
+}
 
 function toggleApiKeyModal() {
   const modal = document.getElementById('apiKeyModal');
@@ -112,12 +132,12 @@ function saveApiKey() {
 }
 
 function updateConfigStatus() {
-  const key = getApiKey();
-  const dot = document.getElementById('configDot');
-  const status = document.getElementById('configStatus');
+  var key = getApiKey();
+  var dot = document.getElementById('configDot');
+  var status = document.getElementById('configStatus');
   if (key) {
     dot.classList.add('configured');
-    status.textContent = '已连接';
+    status.textContent = _aiIsProxyMode ? '云端代理' : '已连接';
   } else {
     dot.classList.remove('configured');
     status.textContent = '未配置';
@@ -344,12 +364,19 @@ async function callDeepSeekAPI(question, ragContext, patientContext, history, on
   // 添加当前问题（如果历史中还没有包含）
   messages.push({ role: 'user', content: question });
 
-  const response = await fetch('https://api.deepseek.com/chat/completions', {
+  // 代理模式走同源 /api/deepseek/chat，直连模式走 DeepSeek 官方
+  var apiUrl = _aiIsProxyMode
+    ? window.location.origin + '/api/deepseek/chat'
+    : 'https://api.deepseek.com/chat/completions';
+
+  var headers = { 'Content-Type': 'application/json' };
+  if (!_aiIsProxyMode) {
+    headers['Authorization'] = 'Bearer ' + apiKey;
+  }
+
+  const response = await fetch(apiUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + apiKey
-    },
+    headers: headers,
     body: JSON.stringify({
       model: 'deepseek-chat',
       messages: messages,
@@ -431,8 +458,8 @@ async function aiQaSend() {
   if (!text) return;
   input.value = '';
 
-  // 检查API密钥
-  if (!getApiKey()) {
+  // 检查API密钥（代理模式下跳过，Key 在服务端）
+  if (!_aiIsProxyMode && !getApiKey()) {
     toggleApiKeyModal();
     return;
   }
