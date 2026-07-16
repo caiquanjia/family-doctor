@@ -19,8 +19,8 @@ export default async (request, context) => {
 
     // Token 端点：如果请求中没有 key，用环境变量注入
     if (isTokenPath) {
-      const envApiKey = Netlify.env.get('BAIDU_API_KEY');
-      const envSecretKey = Netlify.env.get('BAIDU_SECRET_KEY');
+      const envApiKey = process.env.BAIDU_API_KEY;
+      const envSecretKey = process.env.BAIDU_SECRET_KEY;
 
       if (!body || body.indexOf('client_id=') === -1) {
         // 前端没传 Key，用环境变量的
