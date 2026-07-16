@@ -81,10 +81,15 @@ var OcrEngine = (function() {
     var secretKey = getSecretKey();
 
     if (!apiKey || !secretKey) {
-      // 未配置 → 降级到 mock
-      console.log('[OcrEngine] 百度API未配置，使用模拟数据');
-      _fallbackMock(imageBase64, docType, context, callback);
-      return;
+      // 代理模式下由后端环境变量提供 Key，仍走真实 API
+      if (_isLocalProxy) {
+        console.log('[OcrEngine] 代理模式 — 使用服务端环境变量 API Key');
+      } else {
+        // 直连模式下未配置 → 降级到 mock
+        console.log('[OcrEngine] 百度API未配置，使用模拟数据');
+        _fallbackMock(imageBase64, docType, context, callback);
+        return;
+      }
     }
 
     // 有配置 → 走真实API
