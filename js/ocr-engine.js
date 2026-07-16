@@ -140,9 +140,17 @@ var OcrEngine = (function() {
     }
 
     // 获取新 token
-    var body = 'grant_type=client_credentials'
-      + '&client_id=' + encodeURIComponent(apiKey)
-      + '&client_secret=' + encodeURIComponent(secretKey);
+    // 代理模式 + 无本地 Key → 只发 grant_type，服务端注入环境变量
+    // 否则 → 带完整凭证
+    var hasCreds = !!(apiKey && secretKey);
+    var body;
+    if (_isLocalProxy && !hasCreds) {
+      body = 'grant_type=client_credentials';
+    } else {
+      body = 'grant_type=client_credentials'
+        + '&client_id=' + encodeURIComponent(apiKey)
+        + '&client_secret=' + encodeURIComponent(secretKey);
+    }
 
     _httpPost(_getAuthUrl(), body, 'application/x-www-form-urlencoded', function(err, data) {
       if (err) { callback(err, null); return; }

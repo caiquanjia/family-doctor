@@ -535,17 +535,22 @@
 
     var configured = (typeof OcrEngine !== 'undefined') ? OcrEngine.hasCredentials() : false;
     var proxyMode = (typeof OcrEngine !== 'undefined') ? OcrEngine.isProxyMode() : false;
+    var effective = configured || proxyMode;  // 代理模式下服务端有Key，等同于已配置
 
     var badge = document.createElement('div');
     badge.className = 'ocr-config-badge';
-    badge.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:12px;background:' + (configured ? 'rgba(0,181,120,0.06)' : 'rgba(255,125,0,0.06)') + ';border:1px solid ' + (configured ? 'rgba(0,181,120,0.2)' : 'rgba(255,125,0,0.2)') + ';border-radius:8px;font-size:12px;';
+    badge.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:12px;background:' + (effective ? 'rgba(0,181,120,0.06)' : 'rgba(255,125,0,0.06)') + ';border:1px solid ' + (effective ? 'rgba(0,181,120,0.2)' : 'rgba(255,125,0,0.2)') + ';border-radius:8px;font-size:12px;';
+    var statusText = configured ? '百度OCR 已配置' : (proxyMode ? '服务端已托管 API Key — 可直接使用' : '百度OCR 未配置 — 使用模拟数据');
+    var statusIcon = effective ? '✅' : '⚠️';
+    var btnText = configured ? '修改' : (proxyMode ? '说明' : '去配置');
+    var btnColor = effective ? 'var(--success)' : 'var(--warning)';
     badge.innerHTML =
       '<span style="display:flex;align-items:center;gap:6px;">' +
-        '<span>' + (configured ? '✅' : '⚠️') + '</span>' +
-        '<span style="color:var(--text-secondary);">' + (configured ? '百度OCR 已配置 — 将使用真实识别' : '百度OCR 未配置 — 使用模拟数据') + '</span>' +
-        (proxyMode ? '<span style="color:#5b8def;font-size:10px;padding:1px 5px;border:1px solid rgba(91,141,239,0.3);border-radius:3px;">本地代理</span>' : '') +
+        '<span>' + statusIcon + '</span>' +
+        '<span style="color:var(--text-secondary);">' + statusText + '</span>' +
+        (proxyMode ? '<span style="color:#5b8def;font-size:10px;padding:1px 5px;border:1px solid rgba(91,141,239,0.3);border-radius:3px;">云端代理</span>' : '') +
       '</span>' +
-      '<button onclick="toggleBaiduOcrModal()" style="padding:4px 10px;border:1px solid ' + (configured ? 'var(--success)' : 'var(--warning)') + ';border-radius:4px;background:transparent;color:' + (configured ? 'var(--success)' : 'var(--warning)') + ';font-size:11px;cursor:pointer;">' + (configured ? '修改' : '去配置') + '</button>';
+      '<button onclick="toggleBaiduOcrModal()" style="padding:4px 10px;border:1px solid ' + btnColor + ';border-radius:4px;background:transparent;color:' + btnColor + ';font-size:11px;cursor:pointer;">' + btnText + '</button>';
 
     // 插入到拍照区域前面
     var placeholder = container.querySelector('.ocr-photo-placeholder');
