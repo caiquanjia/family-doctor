@@ -1,0 +1,18 @@
+[build]
+  publish = "."
+
+# 首页重定向
+[[redirects]]
+  from = "/"
+  to = "/index-v1.9.html"
+  status = 200
+
+# 百度 OCR API 代理转发到 Netlify Function
+[[redirects]]
+  from = "/api/baidu/*"
+  to = "/.netlify/functions/baidu-proxy"
+  status = 200
+  force = true
+
+[functions]
+  directory = "netlify/functions"

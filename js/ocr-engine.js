@@ -24,11 +24,11 @@ var OcrEngine = (function() {
   // ============================================================
   // CONSTANTS — 代理模式检测
   // ============================================================
-  // 自动检测是否运行在本地代理服务器或 Vercel 上
+  // 自动检测是否运行在本地代理服务器、Vercel 或 Netlify 上
   var _isLocalProxy = (function() {
     try {
       var host = window.location.hostname || '';
-      if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.') || host.startsWith('10.') || host.endsWith('.vercel.app')) {
+      if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.') || host.startsWith('10.') || host.endsWith('.vercel.app') || host.endsWith('.netlify.app')) {
         console.log('[OcrEngine] 检测到代理模式 → 使用同源 /api/baidu/* 路由 (host:' + host + ')');
         return true;
       }
