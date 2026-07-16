@@ -1,0 +1,9 @@
+{
+  "name": "family-doctor-ocr-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "家庭医生助手 — 百度OCR代理 (Vercel部署版)",
+  "engines": {
+    "node": ">=18"
+  }
+}

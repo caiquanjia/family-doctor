@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/baidu/*.js": {
+      "maxDuration": 30
+    },
+    "api/baidu/ocr/*.js": {
+      "maxDuration": 30
+    }
+  }
+}
